@@ -2,20 +2,39 @@ import pygame
 from pygame.locals import * #importing event keywords
 import time #necessary for letting snake move on its own, but slowly
 
+SIZE = 40 #the size of each block that makes up the snake
+
+
+class Apple:
+  def __init__(self, parent_screen):
+    self.image = pygame.image.load('resources/apple.jpeg').convert()
+    self.parent_screen = parent_screen #so that the apple can be painted
+    self.x = SIZE * 3
+    self.y = SIZE * 3
+  
+  def draw(self):
+    self.parent_screen.blit(self.image, (self.x, self.y))
+    pygame.display.flip()
+
 
 class Snake:
-  def __init__(self, parent_screen):
+  def __init__(self, parent_screen, length):
     #draws the starting snake block on the background
-    self.parent_screen = parent_screen
+    self.parent_screen = parent_screen #allows snake to be painted
+    self.length = length
     self.block = pygame.image.load('resources/block.jpeg').convert()
-    self.x = 100
-    self.y = 100
+    self.x = [SIZE] * length
+    self.y = [SIZE] * length
     self.direction = 'down' #snake moves down upon initializing
 
-  #function that draws snake block
+  #function that draws snake block to its new position
   def draw(self):
     self.parent_screen.fill((110, 110, 5)) #erases old block so that it updates with each key hit
-    self.parent_screen.blit(self.block, (self.x, self.y))
+    
+    #drawn snake based on its length
+    for i in range(self.length):
+      self.parent_screen.blit(self.block, (self.x[i], self.y[i]))
+    
     pygame.display.flip()
 
   def move_left(self):
@@ -31,14 +50,21 @@ class Snake:
     self.direction = 'down'
 
   def walk(self):
+
+    #adding functionality to that the latter blocks of the snake move into the place
+    # of the block in front of them
+    for i in range(self.length - 1, 0, -1): #(starting list val, ending list val, step size)
+      self.x[i] = self.x[i - 1]
+      self.y[i] = self.y[i - 1]
+
     if self.direction == 'down':
-      self.y +=10
+      self.y[0] += SIZE # keeps the blocks 40px apart
     elif self.direction == 'up':
-      self.y -=10
+      self.y[0] -= SIZE
     elif self.direction == 'left':
-      self.x -= 10
+      self.x[0] -= SIZE
     else: #move right
-      self.x += 10
+      self.x[0] += SIZE
     
     self.draw()
 
@@ -48,11 +74,17 @@ class Game:
     pygame.init()
 
     #setting the window size and background of the main display
-    self.surface = pygame.display.set_mode((500,500))
+    self.surface = pygame.display.set_mode((1000,800))
     self.surface.fill((110,110,5))
-    self.snake = Snake(self.surface) #creates snake inside of game class
+    self.snake = Snake(self.surface, 6) #creates snake inside of game class
     self.snake.draw() 
+    self.apple = Apple(self.surface)
+    self.apple.draw()
   
+  def play(self):
+    self.snake.walk()
+    self.apple.draw()
+
   def run(self):
     #set loop to continue playing game until the escape or X button is hit
     running = True
@@ -78,8 +110,8 @@ class Game:
         elif event.type == QUIT:
           running = False 
       
-      self.snake.walk()
-      time.sleep(0.2) #every 0.2 seconds snake moves
+      self.play()
+      time.sleep(0.3) #every 0.3 seconds snake moves, needed it to slow down
 
 
 if __name__ == "__main__":
