@@ -81,9 +81,20 @@ class Game:
     self.apple = Apple(self.surface)
     self.apple.draw()
   
+  def is_collision(self, x1, x2, y1, y2):
+    if x1 >= x2 + SIZE and x1 <= x2 + SIZE:
+      if y1 >= x2 + SIZE and y1 <= x2 + SIZE:
+        return True
+    return False
+
+
+
   def play(self):
     self.snake.walk()
     self.apple.draw()
+
+    if self.is_collision(self.snake.x[0], self.snake.y[0], self.apple.x, self.apple.y):
+      print('collision occured')
 
   def run(self):
     #set loop to continue playing game until the escape or X button is hit
