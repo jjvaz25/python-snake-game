@@ -10,8 +10,8 @@ class Apple:
   def __init__(self, parent_screen):
     self.image = pygame.image.load('resources/apple.jpeg').convert()
     self.parent_screen = parent_screen #so that the apple can be painted
-    self.x = SIZE * 3
-    self.y = SIZE * 3
+    self.x = SIZE * 10
+    self.y = SIZE * 10
   
   def draw(self):
     self.parent_screen.blit(self.image, (self.x, self.y))
@@ -33,7 +33,6 @@ class Snake:
 
   #function that draws snake block to its new position
   def draw(self):
-    self.parent_screen.fill((BACKGROUND_COLOR)) #erases old block so that it updates with each key hit
     
     #drawn snake based on its length
     for i in range(self.length):
@@ -82,9 +81,12 @@ class Game:
   def __init__(self):
     pygame.init()
 
+    pygame.mixer.init()
+    self.play_background_music()
     #setting the window size and background of the main display
     self.surface = pygame.display.set_mode((1000,800))
     self.surface.fill((BACKGROUND_COLOR))
+
     self.snake = Snake(self.surface, 5) #creates snake inside of game class
     self.snake.draw() 
     self.apple = Apple(self.surface)
@@ -103,6 +105,7 @@ class Game:
 
 
   def play(self):
+    self.render_background()
     self.snake.walk()
     self.apple.draw()
     self.display_score()
@@ -110,6 +113,8 @@ class Game:
 
     #snake colliding with apple
     if self.is_collision(self.snake.x[0], self.snake.y[0], self.apple.x, self.apple.y): 
+      sound = pygame.mixer.Sound('resources/1_snake_game_resources_ding.mp3')
+      pygame.mixer.Sound.play(sound)
       self.snake.increase_length()
       self.apple.move()
       print('collision occured')
@@ -117,11 +122,14 @@ class Game:
     #snake eating/colliding with itself
     for i in range(2, self.snake.length): #snake can't collide with 0 or 1
       if self.is_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]): 
+        sound = pygame.mixer.Sound('resources/1_snake_game_resources_crash.mp3')
+        pygame.mixer.Sound.play(sound)
         raise 'Game Over!'
-        print('game over')
+      
 
   def show_game_over(self):
-    self.surface.fill((BACKGROUND_COLOR))
+    pygame.mixer.music.pause()
+    self.render_background()
     font = pygame.font.SysFont('arial', 30)
     line1 = font.render(f'Game Over! Score: {self.snake.length}', True, (255, 255, 255))
     self.surface.blit(line1, (200,300))
@@ -132,6 +140,14 @@ class Game:
   def reset(self):
     self.snake = Snake(self.surface, 1)
     self.apple = Apple(self.surface)
+
+  def play_background_music(self):
+    pygame.mixer.music.load('resources/bg_music_1.mp3')
+    pygame.mixer.music.play()
+
+  def render_background(self):
+    bg_image = pygame.image.load('resources/background.jpeg')
+    self.surface.blit(bg_image, (0,0))
 
   def run(self):
     #set loop to continue playing game until the escape or X button is hit
@@ -144,6 +160,7 @@ class Game:
             running = False
           
           if event.key == K_RETURN:
+            pygame.mixer.music.unpause()
             pause = False
 
           #moving the snake based on arrow buttons hit
@@ -171,7 +188,7 @@ class Game:
         pause = True
         self.reset()
       
-      time.sleep(0.1) #every 0.3 seconds snake moves, needed it to slow down
+      time.sleep(0.7) #every 0.2 seconds snake moves, needed it to slow down
       
 
 
