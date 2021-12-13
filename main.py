@@ -188,7 +188,7 @@ class Game:
         pause = True
         self.reset()
       
-      time.sleep(0.7) #every 0.2 seconds snake moves, needed it to slow down
+      time.sleep(0.2) #every 0.2 seconds snake moves, needed it to slow down
       
 
 
